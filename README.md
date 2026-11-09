@@ -22,7 +22,7 @@ There's also a single-file copy, `m39029-contact-id-offline.html`, you can save 
 
 ## Coverage
 
-About 200 common signal and power contacts: MIL-DTL-38999, 26482 Series 1 and 2, 83723, 83733, ARINC 404 and 600, 24308, AS81511/81714, 28748, 28840 and relay sockets. Coax, twinax, shielded and thermocouple contacts are not included. Entries marked "Check DMC" were unclear in the source chart.
+About 200 common signal and power contacts: MIL-DTL-38999, 26482 Series 1 and 2, 83723, 83733, ARINC 404 and 600, 24308, AS81511/81714, 28748, 28840 and relay sockets, plus Amphenol LMD terminal junction contacts (search by part number). Coax, twinax, shielded and thermocouple contacts are not included. Entries marked "Check DMC" were unclear in the source chart.
 
 ## Report a problem
 

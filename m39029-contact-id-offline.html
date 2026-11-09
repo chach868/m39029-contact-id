@@ -163,7 +163,7 @@ button.plain:disabled{opacity:.5}
 
   <div class="search">
     <label for="q">Or search by part number or BIN</label>
-    <input id="q" type="search" inputmode="text" autocomplete="off" placeholder="e.g. 56-348, MS27493-20, 363">
+    <input id="q" type="search" inputmode="text" autocomplete="off" placeholder="e.g. 56-348, MS27493-20, 363, LMD-4022">
     <ul class="hits" id="hits"></ul>
   </div>
 
@@ -171,7 +171,7 @@ button.plain:disabled{opacity:.5}
     <summary>About and disclaimer</summary>
     <p>A free quick reference for identifying M39029 crimp contacts by their color bands and finding the matching DMC crimp, insertion and removal tooling. Built by a working avionics tech for other techs.</p>
     <p><strong>This is not approved maintenance data.</strong> Verify the part number and tooling against current Daniels Manufacturing (DMC) data and the positioner or turret data plate, and follow your approved data and crimp procedures. Color reads from the camera can be wrong; confirm the bands by eye.</p>
-    <p>Tooling data is compiled from DMC's published M39029 power contact wall chart. Entries marked "Check DMC" were unclear in the source. It covers common signal and power contacts, not coax, twinax, shielded or thermocouple contacts.</p>
+    <p>Tooling data is compiled from DMC's published M39029 power contact wall chart. Entries marked "Check DMC" were unclear in the source. It covers common signal and power contacts, plus Amphenol LMD terminal junction contacts (search by part number), not coax, twinax, shielded or thermocouple contacts.</p>
     <p>Not affiliated with or endorsed by Daniels Manufacturing Corporation. DMC and its product names belong to their owner. Provided as-is, with no warranty of any kind.</p>
   </details>
   <p class="foot">Reference only. Confirm against the tool data plate and DMC's lookup at <a href="https://www.dmctools.com/" target="_blank" rel="noopener">dmctools.com</a> before crimping.<br>Found a wrong entry or a missing contact? <a href="https://github.com/chach868/m39029-contact-id/issues/new" target="_blank" rel="noopener">Report a problem</a>.</p>
@@ -188,7 +188,7 @@ const FRAMES={
  "MH860":{mil:"M22520/7-01",head:"positioner"},
  "39-000":{mil:"M22520/34-01",head:"positioner"},
  "WA23":{mil:"M22520/23-01",head:"locator / die"}};
-const HEADMIL={"K287":"M22520/2-11","TH163":"M22520/1-04","K42":"M22520/2-09","K43":"M22520/2-10"};
+const HEADMIL={"K287":"M22520/2-11","TH1A":"M22520/1-02","K40":"M22520/2-07","TH163":"M22520/1-04","K42":"M22520/2-09","K43":"M22520/2-10"};
 
 const SERIES={1:"MIL-DTL-12883 relay sockets",2:"MIL-DTL-22992 Class L",3:"MIL-DTL-24308",4:"MIL-DTL-26482 Series 1",
  5:"MIL-DTL-26482 Series 2",6:"MIL-DTL-26500",7:"MIL-DTL-28748",8:"MIL-DTL-28840",9:"MIL-C-38300",10:"MIL-DTL-38999 Series I",
@@ -324,6 +324,19 @@ add(102,1,"P","14","16","16–20","AF8:TH1A","DAK83-16B or M81969/14-03","DRK83-
 add(103,1,"P","12","12","12–14","AF8:TH1A","DAK83-12B or M81969/14-04","DRK83-12B or M81969/14-04","M39029/1-12-12");
 add(507,1,"P","20","22D","22–28","AFM8:K496-1","DAK95-22MB or M81969/14-01","DRK95-22MB or M81969/14-01","M39029/1-20-22D");
 
+// Amphenol LMD modular terminal junction contacts (not M39029; no BIN code). Source: Amphenol LMD/LMS catalog section.
+const X=[];
+function addX(pn,t,size,awg,stripe,tools,ir,note){X.push({pn,t,mate:size,bar:size,awg,stripe,tools,ins:ir,rem:ir,note,series:"Amphenol LMD modular terminal junction"});}
+const LMD22="Amphenol lists AFM8-style positioners TP-201401-H2 (pin) and TP-201409 / TP-201401-2-07 (socket) for size 22. Confirm the positioner with DMC before crimping.";
+addX("LMD-4022-36LJ","P","22","28–22","","AFM8:Check DMC","M81969/14-01 (green)",LMD22);
+addX("LMD-4122-96LD","S","22","28–22","Green stripe","AFM8:Check DMC","M81969/14-01 (green)",LMD22);
+addX("LMD-4020-96LD","P","20","24–20","","AF8:TH1A","M81969/14-02 (red)","Amphenol lists the M22520/1-02 turret head (DMC TH1A) for sizes 20 and 16.");
+addX("LMD-4120-96LD","S","20","24–20","Red stripe","AF8:TH1A","M81969/14-02 (red)","Amphenol lists the M22520/1-02 turret head (DMC TH1A) for sizes 20 and 16.");
+addX("LMD-4016-96LD","P","16","20–16","","AF8:TH1A","M81969/14-03 (blue)","Amphenol lists the M22520/1-02 turret head (DMC TH1A) for sizes 20 and 16.");
+addX("LMD-4116-96LD","S","16","20–16","","AF8:TH1A","M81969/14-03 (blue)","Amphenol lists the M22520/1-02 turret head (DMC TH1A) for sizes 20 and 16.");
+addX("LMD-4008-36L","P","8","14–8","","","M81969/29-02","Crimp with Amphenol locators TP-201393 / TP-201408; no DMC equivalent listed.");
+addX("LMD-4108-36L","S","8","14–8","","","M81969/29-02","Crimp with Amphenol locators TP-201393 / TP-201408; no DMC equivalent listed.");
+
 // ---------- UI ----------
 let bands=[null,null,null], active=0;
 const $=id=>document.getElementById(id);
@@ -369,7 +382,8 @@ function drawSwatches(){
     s.appendChild(b);
   });
 }
-function pn(c){return `M39029/${c.sl}-${c.bin}`;}
+function pn(c){return c.pn||`M39029/${c.sl}-${c.bin}`;}
+function showOther(c){bands=[null,null,null];active=0;render();showContact(c);window.scrollTo({top:$("out").offsetTop-80,behavior:"smooth"});}
 function toolRows(c){
   let rows="";
   if(c.tools){ c.tools.split("|").forEach(p=>{
@@ -387,7 +401,10 @@ function showContact(c,note){
     <p class="desc">${c.t==="P"?"Pin":"Socket"}, size ${c.mate}${sameSize?"":` mating end with ${c.bar} wire barrel`}, ${c.awg} AWG</p>
     ${c.sup?`<p class="meta">Superseded P/N <strong>${c.sup}</strong></p>`:""}
     ${used?`<p class="meta">Used in <strong>${used}</strong></p>`:""}
+    ${c.series?`<p class="meta">Series <strong>${c.series}</strong></p>`:""}
+    ${c.stripe?`<p class="meta">Marking <strong>${c.stripe}</strong></p>`:""}
     <table class="tools">${toolRows(c)}</table>
+    ${c.note?`<p class="hint">${c.note}</p>`:""}
     ${note||""}</div>`;
 }
 function reverseNote(b){
@@ -413,13 +430,13 @@ $("clear").onclick=()=>{bands=[null,null,null];active=0;render();};
 $("q").addEventListener("input",e=>{
   const q=e.target.value.trim().toUpperCase().replace(/\s+/g,"");
   const h=$("hits"); h.innerHTML=""; if(q.length<2) return;
-  const found=Object.values(D).filter(c=>{
+  const found=Object.values(D).concat(X).filter(c=>{
     const full=pn(c).toUpperCase(); return full.includes(q)||`${c.sl}-${c.bin}`===q||String(c.bin)===q||(c.sup&&c.sup.toUpperCase().includes(q));
   }).slice(0,8);
   if(!found.length){h.innerHTML=`<li class="meta">No match in this table.</li>`;return;}
   found.forEach(c=>{const li=document.createElement("li");const b=document.createElement("button");
     b.innerHTML=`${pn(c)}<span>${c.t==="P"?"Pin":"Socket"} ${c.mate}${c.mate!==c.bar?"/"+c.bar:""}</span>`;
-    b.onclick=()=>{setBin(c.bin);h.innerHTML="";e.target.value="";}; li.appendChild(b); h.appendChild(li);});
+    b.onclick=()=>{if(c.bin!==undefined)setBin(c.bin);else showOther(c);h.innerHTML="";e.target.value="";}; li.appendChild(b); h.appendChild(li);});
 });
 
 drawSwatches(); render();
